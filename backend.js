@@ -2,15 +2,22 @@ const express = require('express')
 const axios = require('axios')
 const app = express()
 const port = 3000
+const cors = require('cors')
 const fetch = require('node-fetch');
 
 app.use(
 	express.urlencoded({
-	  extended: true
+		extended: true
 	})
-  )
-  
-  app.use(express.json())
+);
+
+app.use(express.json())
+app.use(cors())
+
+var corsOptions = {
+	origin: '*',
+	optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+  }
 
 // const BASE_URL = 'https://af-erp.ifs.cloud:48080/main/ifsapplications/projection/v1'; // prod
 const BASE_URL = 'https://af-erp-test.ifs.cloud:48080/main/ifsapplications/projection/v1'; // test
@@ -91,24 +98,13 @@ app.get('/time', function (req, res) {
 
 	});
 });
-app.post('/report', function (req, res) {
-
+app.post('/report', cors(corsOptions), function (req, res) {
 	const post = req.body;
-	
-	const post2 = [
-		{date: '2021-05-31', hours: "8"},
-		{date: '2021-06-01', hours: "8"},
-		// {date: '2021-06-02', hours: "3"},
-		// {date: '2021-06-03', hours: "4"},
-		// {date: '2021-06-04', hours: "5"},
-	];
-
 	let requestCount = post.length;
 
-
 	post.forEach(day => {
-		postBody.AccountDateDate = day.date;
-		postBody.DayHours = day.hours;
+		postBody.AccountDateDate = "" + day.date + "";
+		postBody.DayHours = "" + day.hours + "";
 		ifsPost('/TimeRegistrationEmployeeHandling.svc/ReportTimeWithIntervals', postBody, () => {
 			requestCount--;
 			if(requestCount == 0)  {
